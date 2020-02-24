@@ -17,6 +17,11 @@ public final class FileProcessor {
 	private BufferedReader reader;
 	private String line;
 
+
+	public String getLine() {
+		return line;
+	}
+
 	public FileProcessor(String inputFilePath) 
 		throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
 		
@@ -27,11 +32,11 @@ public final class FileProcessor {
 		reader = new BufferedReader(new FileReader(new File(inputFilePath)));
 		line = reader.readLine();
 	}
-
-	public Integer poll() throws NumberFormatException, IOException {
+	
+	public String poll() throws IOException {
 		if (null == line) return null;
 
-		Integer newValue = Integer.parseInt(line.trim());
+		String newValue = line.trim();
 		line = reader.readLine();
 		return newValue;
 	}
