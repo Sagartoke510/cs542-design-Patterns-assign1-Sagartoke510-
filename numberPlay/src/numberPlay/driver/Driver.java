@@ -1,7 +1,30 @@
 package numberPlay.driver;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.util.ArrayList;
+import java.util.List;
+
+import numberPlay.observer.NumberPeaksObserver;
+import numberPlay.observer.ObserverI;
+import numberPlay.observer.RunningAverageObserver;
+import numberPlay.observer.TopKNumberObserver;
+import numberPlay.observer.filter.EventTriggerFilter;
+import numberPlay.observer.filter.FilterI;
+import numberPlay.subject.NumberProcessor;
+import numberPlay.subject.SubjectI;
+import numberPlay.util.EventTrigger;
+import numberPlay.util.FileProcessor;
+import numberPlay.util.NumberPeaksData;
+import numberPlay.util.NumberPeaksResultsI;
+import numberPlay.util.RunningAverageData;
+import numberPlay.util.RunningAverageResultsI;
+import numberPlay.util.TopKNumbersData;
+import numberPlay.util.TopKNumbersResultsI;
+
 /**
- * @author John Doe
+ * @author Sagar Toke
  * TODO update the author name.
  */
 public class Driver {
@@ -25,19 +48,58 @@ public class Driver {
 			System.err.printf("Error: Incorrect number of arguments. Program accepts %d arguments.", REQUIRED_NUMBER_OF_ARGS);
 			System.exit(0);
 		}
-
+		
+		File file = new File(args[0]);
+		String path = file.getAbsolutePath();
+		System.out.println("path"+path);
+		
+		
 		// FIXME Create an instance of each of the classes implementing PersisterI and the 
 		// corresponding ResultsI interface.
 		// Observers use these objects to dump data to be stored and eventually persisted 
 		// to the corresponding output file.
 
 		// FIXME Instantiate the subject.
-
+		try {
+		SubjectI numberProcessor = new NumberProcessor();
 		// FIXME Instantiate the observers, providing the necessary filter and the results object.
+		RunningAverageResultsI runningAverageResults = new RunningAverageData(args[1]);
+		TopKNumbersResultsI topKResults = new TopKNumbersData(args[3]);
+		NumberPeaksResultsI numberPeakResults = new NumberPeaksData();
+		
+		ObserverI runningAverage = new RunningAverageObserver(args[1]);
+		ObserverI topKNumbers = new TopKNumberObserver(topKResults);
+		ObserverI numberPeak = new NumberPeaksObserver(numberPeakResults);
+		
+		FilterI integerEventFilter = new EventTriggerFilter(EventTrigger.INTEGER_EVENT);
+		FilterI	floatingPointEventFilter = new EventTriggerFilter(EventTrigger.FLOATING_POINT_EVENT);
+		FilterI processingCompleteFilter = new EventTriggerFilter(EventTrigger.PROCESSING_COMPLETE);
 
+		List<FilterI> integerProcessingCompleteFilter = new ArrayList<FilterI>();
+		integerProcessingCompleteFilter.add(integerEventFilter);
+		integerProcessingCompleteFilter.add(processingCompleteFilter);
+		
+		List<FilterI> allEventTriggerFilter = new ArrayList<FilterI>();
+		allEventTriggerFilter.add(integerEventFilter);
+		allEventTriggerFilter.add(floatingPointEventFilter);
+		allEventTriggerFilter.add(processingCompleteFilter);
+		
+		
+		
 		// FIXME Register each observer with the subject for the necessary set of events.
+
+		numberProcessor.register(runningAverage, integerProcessingCompleteFilter);
+		numberProcessor.register(topKNumbers, allEventTriggerFilter);
+		numberProcessor.register(numberPeak, allEventTriggerFilter);
 
 		// FIXME Delegate control to a separate utility class/method that provides numbers one at a time, from the FileProcessor,
 		// to the subject.
+		
+		
+		numberProcessor.process(path);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
