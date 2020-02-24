@@ -32,13 +32,15 @@ public class NumberProcessor implements SubjectI {
 				fp = new FileProcessor(inputFilePath);
 				while(fp.getLine()!=null) {
 					Number n = 	NumberFormat.getInstance().parse(fp.poll());
-					if(n instanceof Integer)
+					if(n instanceof Long)
 						notifyAll(EventTrigger.INTEGER_EVENT, n);
 					if (n instanceof Float || n instanceof Double)
 						notifyAll(EventTrigger.FLOATING_POINT_EVENT,n);
 					if (n.equals(null))
 						notifyAll(EventTrigger.PROCESSING_COMPLETE, n);
 				}	
+				if(fp.getLine() == null)
+					notifyAll(EventTrigger.PROCESSING_COMPLETE, null);
 				fp.close();
 			} catch (InvalidPathException | SecurityException | IOException | ParseException e) {
 				e.printStackTrace();
@@ -61,7 +63,7 @@ public class NumberProcessor implements SubjectI {
 		for (Map.Entry<FilterI, List<ObserverI>> entry : observers.entrySet()) {
 			if (entry.getKey().check(et)) {
 				for (ObserverI o : entry.getValue()) {
-					o.update(n);
+					o.update(n, et);
 				}
 			}
 		}
