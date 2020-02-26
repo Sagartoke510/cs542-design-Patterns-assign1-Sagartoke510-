@@ -13,6 +13,11 @@ import java.nio.file.InvalidPathException;
 
 import java.util.List;
 
+/**
+ * The class {@code FileProcessor} processes the input and read contents line by line.
+ * @author Sagar Toke
+ *
+ */
 public final class FileProcessor {
 	private BufferedReader reader;
 	private String line;
@@ -33,6 +38,11 @@ public final class FileProcessor {
 		line = reader.readLine();
 	}
 	
+	/**
+	 * Method to read input file line by line
+	 * @return String line read from the input file
+	 * @throws IOException
+	 */
 	public String poll() throws IOException {
 		if (null == line) return null;
 
@@ -41,6 +51,10 @@ public final class FileProcessor {
 		return newValue;
 	}
 
+	/**
+	 * Method to close all the resources open to read the file
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
 		try {
 			reader.close();
